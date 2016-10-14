@@ -1,0 +1,47 @@
+// MAPPING config file
+//
+// DetectorName'\t'	StripPerPartition'\t'	PartitionCut'\n'
+// TDC_start'\t'	TDC_end'\t'	Strip_start'\t'	Strip_end'\n'
+// ...
+// TDC_start'\t'	TDC_end'\t'	Strip_start'\t'	Strip_end'\n'
+// '\n' (when detector setting is end)
+//
+// You can find TDC channel & strip number for each test beam
+// on https://drive.google.com/open?id=1LyIAcLzgN0jdvHnPx1cIScB__B4uFL9U5UqvBO9ENrg
+//
+T3S5 (KODEL_DG12)	32	AB
+2000	2015	1	16
+2016	2031	17	32
+2032	2047	64	49
+2048	2063	48	33
+
+T3S6 (KODEL_MG05)	32	AB
+2064	2079	1	16
+2080	2095	17	32
+2096	2111	64	49
+2112	2127	48	33
+
+T3S1 (GT_16)	48	AB
+3000	3015	33	48
+3016	3031	1	16
+3064	3079	64	49
+3080	3095	96	81
+3096	3111	80	65
+3112	3127	17	32
+
+T3S3 (GT_18)	48	AB
+4000	4015	1	16
+4016	4031	17	32
+4032	4047	33	48
+4048	4063	64	49
+4064	4079	80	65
+4080	4095	96	81
+
+T3S4 (GT_20)	48	AB
+5000	5015	1	16
+5016	5031	17	32
+5032	5047	33	48
+5048	5063	64	49
+5064	5079	80	65
+5080	5095	96	81
+
