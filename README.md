@@ -1,7 +1,7 @@
 # GIFAnalysis
 GIF++ Analysis Code
 
-1. Make MAP file - MAP*
+__1. Make MAP file - MAP*__ 
 
   DetectorName'\t'     StripPerPartition'\t'   PartitionCut'\n'  
   TDC_start'\t'        TDC_end'\t'     Strip_start'\t' Strip_end'\n'  
@@ -19,7 +19,7 @@ GIF++ Analysis Code
   You can find TDC channel & strip number for each test beam  
   on https://drive.google.com/open?id=1LyIAcLzgN0jdvHnPx1cIScB__B4uFL9U5UqvBO9ENrg  
   
-2. Make Calibration file - calibrate.C -> CAL*  
+__2. Make Calibration file - calibrate.C -> CAL*__
   
   InputRootFile : DAQ.root file - NoSource(or at least ABS220) with Beam   
   MAPConfigFile : Map file(#1)  
@@ -28,7 +28,7 @@ GIF++ Analysis Code
   Cut_RMSAfterCut : Check broad peak  
   (GIF++ do not use calibration time)  
   
-3. Clustering - KODEL.C -> DAQ-KODEL.root  
+__3. Clustering - KODEL.C -> DAQ-KODEL.root__ 
   
   InputRootFile : DAQ.root file  
   MAPConfigFile : Map file(#1)  
@@ -36,7 +36,7 @@ GIF++ Analysis Code
   Delta_Partition : Definition of adjacent partition for clustering (GIF++ clustering : 0 - do not use)  
   Delta_Time : Definition of adjacent time for clustering (GIF++ clustering : do not use adjacent time / using beam timing cut)  
   
-4. Make trolly SET file - SET*  
+__4. Make trolly SET file - SET*__
   
   Trolly SETTING config file  
   
@@ -51,7 +51,7 @@ GIF++ Analysis Code
   https://drive.google.com/drive/folders/0BwXFTEDFLcaVelc2SEV2UmRfa1U  
   (Source base coordinate : https://drive.google.com/open?id=0B3Uwh2qCP96vM2s2OFhoVkFmSDg)  
   
-5. Tracking - Tracking.C -> DAQ-Trk.root  
+__5. Tracking - Tracking.C -> DAQ-Trk.root__
   
   InputRootFile : DAQ-KODEL.root  
   MAPConfigFile : MAP file(#1)  
