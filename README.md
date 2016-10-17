@@ -4,13 +4,9 @@ GIF++ Analysis Code
 1. Make MAP file - MAP*
 
 DetectorName'\t'     StripPerPartition'\t'   PartitionCut'\n'
-
 TDC_start'\t'        TDC_end'\t'     Strip_start'\t' Strip_end'\n'
-
 ...
-
 TDC_start'\t'        TDC_end'\t'     Strip_start'\t' Strip_end'\n'
-
 '\n' (when detector setting is end)
 
 
