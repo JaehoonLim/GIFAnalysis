@@ -88,6 +88,7 @@ public :
    map<string,int>    DEC_positionY;
    map<string,int>    DEC_total;
    map<string,int>    DEC_partition;
+   vector<string>     BEAM_position;
 
 };
 
@@ -206,6 +207,7 @@ void Tracking::ReadConfig(string mapconfig, string setconfig){
    DEC_rotation.clear();
    DEC_total.clear();
    DEC_partition.clear();
+   BEAM_position.clear();
 
    while (mapfile) {
       if (!getline( mapfile, s_line )) break;
@@ -242,13 +244,17 @@ void Tracking::ReadConfig(string mapconfig, string setconfig){
             temp_input.push_back(temp_string);
       }
 
-      if (temp_input.size()>1) {
+      if (temp_input.size()>1 && temp_input.at(0) != "BEAM") {
          DEC_name.push_back(temp_input.at(0));
          DEC_sizeX[temp_input.at(0)]     = atof((temp_input.at(2)).c_str());
          DEC_sizeY[temp_input.at(0)]     = atof((temp_input.at(3)).c_str());
          DEC_positionX[temp_input.at(0)] = atof((temp_input.at(4)).c_str());
          DEC_positionY[temp_input.at(0)] = atof((temp_input.at(5)).c_str());
          DEC_rotation[temp_input.at(0)]  = atoi((temp_input.at(6)).c_str());
+      } else (temp_input.at(0) == "BEAM"){
+         for(int beam_i = 1; beam_i < 7; ++beam_i){
+            BEAM_position.push_back(temp_input.at(beam_i));
+         }
       }
    }
 
@@ -260,7 +266,7 @@ void Tracking::Loop()
    TFile *OutputFile = new TFile(Form("%s", file_name.c_str()),"RECREATE");
    TTree *KODEL_Tree   = new TTree("KODEL_Tree","KODEL_Tree");
 
-   int NumTrack, stripX, stripY, strip_max, strip_min, temp_strip;
+   int NumTrack, NumMuonTrack, stripX, stripY, strip_max, strip_min, temp_strip;
    float size_partitionX, center_partitionX, size_stripY, center_stripY, temp_x, temp_y, size_clusterY, temp_dx, temp_dy, delta_clusterX, delta_clusterY;
 
    vector<string> Cluster_DEC;
@@ -275,8 +281,10 @@ void Tracking::Loop()
    vector<bool> Track_CheckDetectorS4;
    vector<bool> Track_CheckDetectorS5;
    vector<bool> Track_CheckDetectorS6;
+   vector<bool> Track_isMuonTrack;
 
    KODEL_Tree->Branch("Info_NumTrack",           &NumTrack);
+   KODEL_Tree->Branch("Info_NumMuonTrack",       &NumMuonTrack);
 
    KODEL_Tree->Branch("Cluster_DEC_Type",        &Cluster_DEC);
    KODEL_Tree->Branch("Cluster_PositionX",       &Cluster_positionX);
@@ -298,6 +306,7 @@ void Tracking::Loop()
    KODEL_Tree->Branch("Track_ClusterOnS4",       &Track_CheckDetectorS4);            // Check Cluster on each Detector
    KODEL_Tree->Branch("Track_ClusterOnS5",       &Track_CheckDetectorS5);            // Check Cluster on each Detector
    KODEL_Tree->Branch("Track_ClusterOnS6",       &Track_CheckDetectorS6);            // Check Cluster on each Detector
+   KODEL_Tree->Branch("Track_isMuonTrack",       &Track_isMuonTrack);                // Check Track position
 
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
@@ -308,6 +317,7 @@ void Tracking::Loop()
 
       if (jentry%(nentries/10) == 0 && jentry != 0) cout << "running " << jentry << "th event (" << jentry/(nentries/100) << "%)" << endl;
       NumTrack = 0;
+      NumMuonTrack = 0;
 
       Cluster_DEC.clear();
       Cluster_positionX.clear();
@@ -329,6 +339,7 @@ void Tracking::Loop()
       Track_CheckDetectorS4.clear();
       Track_CheckDetectorS5.clear();
       Track_CheckDetectorS6.clear();
+      Track_isMuonTrack.clear();
 
       for(int cluster_i=0;cluster_i<Cluster_DEC_Type->size();++cluster_i){
 
@@ -464,11 +475,22 @@ void Tracking::Loop()
                 ++num_cluster;
             }
          }
+         mean_X /= num_cluster;
+         mean_Y /= num_cluster;
+         mean_T /= num_cluster;
          Track_index.push_back(trk);
          Track_NClusters.push_back(num_cluster);
-         Track_positionX.push_back(mean_X / num_cluster);
-         Track_positionY.push_back(mean_Y / num_cluster);
-         Track_time.push_back(mean_T / num_cluster);
+         Track_positionX.push_back(mean_X);
+         Track_positionY.push_back(mean_Y);
+         Track_time.push_back(mean_T);
+         if(mean_X > BEAM_position.at(0) - BEAM_position.at(1) && mean_X < BEAM_position.at(0) + BEAM_position.at(1) &&
+            mean_Y > BEAM_position.at(2) - BEAM_position.at(3) && mean_Y < BEAM_position.at(2) + BEAM_position.at(3) &&
+            mean_T > BEAM_position.at(4) - BEAM_position.at(5) && mean_T < BEAM_position.at(4) + BEAM_position.at(5)){
+             Track_isMuonTrack.push_back(true);
+             ++NumMuonTrack;
+         } else {
+             Track_isMuonTrack.push_back(false);
+         }
          for(map<string,bool>::iterator it = check_track.begin();it != check_track.end();++it) { 
             if((it->first).find("S1") != std::string::npos) Track_CheckDetectorS1.push_back(it->second); 
             if((it->first).find("S2") != std::string::npos) Track_CheckDetectorS2.push_back(it->second); 
