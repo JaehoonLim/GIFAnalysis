@@ -43,7 +43,7 @@ __4. Make trolly SET file - SET*__
   BEAM'\t' X_mean'\t' X_error'\t' Y_mean'\t' Y_error'\t' Time_mean'\t' Time_error'\n'
   
   ex)  
-  BEAM    1.5       0.5       27.5      5       0       50  
+  BEAM    1.5       0.5       27.5      5       0       30  
   
   DetectorName'\t' Order'\t' DetectorWidth(x)'\t' DetectorHeight(y)'\t' DetectorPosition(x)'\t' DetectorPosition(y)'\t' RotationAngle'\n'  
   
