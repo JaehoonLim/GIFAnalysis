@@ -38,12 +38,17 @@ __3. Clustering - KODEL.C -> DAQ-KODEL.root__
   
 __4. Make trolly SET file - SET*__
   
-  Trolly SETTING config file  
+  Trolly & Beam SETTING config file  
+  
+  BEAM'\t' X_mean'\t' X_error'\t' Y_mean'\t' Y_error'\t' Time_mean'\t' Time_error'\n'
+  
+  ex)  
+  BEAM    1       0       27      5       0       50  
   
   DetectorName'\t' Order'\t' DetectorWidth(x)'\t' DetectorHeight(y)'\t' DetectorPosition(x)'\t' DetectorPosition(y)'\t' RotationAngle'\n'  
   
   ex)  
-  T3S5 (KODEL_DG12)       4       2       32      1       10      0  
+  T3S5 (KODEL_DG12)       4       2       32      1       7      0  
   T3S1 (GT_16)    3       2       48      0       0       180  
   
   DetectorWidth, Height, PositionX, PositionY on example file is not real value. (just for tracking test)  
