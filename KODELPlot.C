@@ -171,13 +171,17 @@ void KODELPlot(string rootfile_name, string mapfile_name, string setfile_name, s
       y_bin_end     = temp_swap;
    }
 
-   int test_x = 600;
-   if(type_name == "Clusters") test_x = 20;
+   int test_x_start = -100;
+   int test_x_end   = 700;
+   if(type_name == "Clusters") {
+      test_x_start = 0;
+      test_x_end   = 20;
+   }
 
    TH2F* h_test     = new TH2F("h_test", "h_test", histo_width, histo_x_start, histo_x_end, histo_height, histo_y_start, histo_y_end);
    TH1F* h_TimeCal  = new TH1F("h_TimeCal", "h_TimeCal", 800, -400, 400);
    TH1F* h_NHits    = new TH1F("h_NHits", "h_NHits", DEC_total[dec_name] , 0, DEC_total[dec_name] );
-   TH1F* h_test2    = new TH1F("h_test2", "h_test2", test_x, 0, test_x);
+   TH1F* h_test2    = new TH1F("h_test2", "h_test2", test_x_end-test_x_start, test_x_start, test_x_end);
 
    TFile* f_input = new TFile(Form("%s",rootfile_name.c_str()));
    TTree* t_input = (TTree*)f_input->Get("KODEL_Tree");
@@ -339,6 +343,7 @@ void KODELPlot(string rootfile_name, string mapfile_name, string setfile_name, s
    h_test2->SetTitle(Form("%s;%s;%s",title_name.c_str(),test2_xtitle.c_str(),"Entries"));
    h_test2->Draw("");
    l_test2->Draw("same");
+   test2_xtitle.replace(12,7,"");
 
    c_test2->SaveAs(Form("%s_%s_%s_%s_%s.png",rootfile_name.c_str(),dec_name.c_str(),type_name.c_str(),event_number.c_str(),test2_xtitle.c_str()));
 
