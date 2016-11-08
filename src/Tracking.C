@@ -88,7 +88,7 @@ public :
    map<string,int>    DEC_positionY;
    map<string,int>    DEC_total;
    map<string,int>    DEC_partition;
-   vector<string>     BEAM_position;
+   vector<float>      BEAM_position;
 
 };
 
@@ -244,16 +244,18 @@ void Tracking::ReadConfig(string mapconfig, string setconfig){
             temp_input.push_back(temp_string);
       }
 
-      if (temp_input.size()>1 && temp_input.at(0) != "BEAM") {
-         DEC_name.push_back(temp_input.at(0));
-         DEC_sizeX[temp_input.at(0)]     = atof((temp_input.at(2)).c_str());
-         DEC_sizeY[temp_input.at(0)]     = atof((temp_input.at(3)).c_str());
-         DEC_positionX[temp_input.at(0)] = atof((temp_input.at(4)).c_str());
-         DEC_positionY[temp_input.at(0)] = atof((temp_input.at(5)).c_str());
-         DEC_rotation[temp_input.at(0)]  = atoi((temp_input.at(6)).c_str());
-      } else (temp_input.at(0) == "BEAM"){
-         for(int beam_i = 1; beam_i < 7; ++beam_i){
-            BEAM_position.push_back(temp_input.at(beam_i));
+      if (temp_input.size()>1){
+         if(temp_input.at(0) != "BEAM") {
+            DEC_name.push_back(temp_input.at(0));
+            DEC_sizeX[temp_input.at(0)]     = atof((temp_input.at(2)).c_str());
+            DEC_sizeY[temp_input.at(0)]     = atof((temp_input.at(3)).c_str());
+            DEC_positionX[temp_input.at(0)] = atof((temp_input.at(4)).c_str());
+            DEC_positionY[temp_input.at(0)] = atof((temp_input.at(5)).c_str());
+            DEC_rotation[temp_input.at(0)]  = atoi((temp_input.at(6)).c_str());
+         } else {
+            for(int beam_i = 1; beam_i < 7; ++beam_i){
+               BEAM_position.push_back(atof((temp_input.at(beam_i)).c_str()));
+            }
          }
       }
    }
