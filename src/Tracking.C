@@ -83,7 +83,8 @@ public :
    vector<string>     DEC_name;
    map<string,int>    DEC_rotation;
    map<string,int>    DEC_sizeX;
-   map<string,int>    DEC_sizeY;
+   map<string,int>    DEC_sizeYW;
+   map<string,int>    DEC_sizeYN;
    map<string,int>    DEC_positionX;
    map<string,int>    DEC_positionY;
    map<string,int>    DEC_total;
@@ -201,7 +202,8 @@ void Tracking::ReadConfig(string mapconfig, string setconfig){
 
    DEC_name.clear();
    DEC_sizeX.clear();
-   DEC_sizeY.clear();
+   DEC_sizeYW.clear();
+   DEC_sizeYN.clear();
    DEC_positionX.clear();
    DEC_positionY.clear();
    DEC_rotation.clear();
@@ -248,10 +250,11 @@ void Tracking::ReadConfig(string mapconfig, string setconfig){
          if(temp_input.at(0) != "BEAM") {
             DEC_name.push_back(temp_input.at(0));
             DEC_sizeX[temp_input.at(0)]     = atof((temp_input.at(2)).c_str());
-            DEC_sizeY[temp_input.at(0)]     = atof((temp_input.at(3)).c_str());
-            DEC_positionX[temp_input.at(0)] = atof((temp_input.at(4)).c_str());
-            DEC_positionY[temp_input.at(0)] = atof((temp_input.at(5)).c_str());
-            DEC_rotation[temp_input.at(0)]  = atoi((temp_input.at(6)).c_str());
+            DEC_sizeYW[temp_input.at(0)]    = atof((temp_input.at(3)).c_str());
+            DEC_sizeYN[temp_input.at(0)]    = atof((temp_input.at(4)).c_str());
+            DEC_positionX[temp_input.at(0)] = atof((temp_input.at(5)).c_str());
+            DEC_positionY[temp_input.at(0)] = atof((temp_input.at(6)).c_str());
+            DEC_rotation[temp_input.at(0)]  = atoi((temp_input.at(7)).c_str());
          } else {
             for(int beam_i = 1; beam_i < 7; ++beam_i){
                BEAM_position.push_back(atof((temp_input.at(beam_i)).c_str()));
@@ -268,7 +271,7 @@ void Tracking::Loop()
    TFile *OutputFile = new TFile(Form("%s", file_name.c_str()),"RECREATE");
    TTree *KODEL_Tree   = new TTree("KODEL_Tree","KODEL_Tree");
 
-   int NumTrack, NumMuonTrack, stripX, stripY, strip_max, strip_min, temp_strip;
+   int NumTrack, NumMuonTrack, stripX, stripY, strip_max, strip_min, temp_strip, NumPartition;
    float size_partitionX, center_partitionX, size_stripY, center_stripY, temp_x, temp_y, size_clusterY, temp_dx, temp_dy, delta_clusterX, delta_clusterY;
 
    vector<string> Cluster_DEC;
@@ -277,18 +280,22 @@ void Tracking::Loop()
 
    vector<int> Track_index, Track_NClusters, Track_NDetectors;
    vector<float> Track_positionX, Track_positionY, Track_time;
-   vector<bool> Track_CheckDetectorS1;
-   vector<bool> Track_CheckDetectorS2;
-   vector<bool> Track_CheckDetectorS3;
-   vector<bool> Track_CheckDetectorS4;
-   vector<bool> Track_CheckDetectorS5;
-   vector<bool> Track_CheckDetectorS6;
    vector<bool> Track_isMuonTrack;
+   map< std::string,vector<bool> > Track_CheckDetector;
+   for(int map_int = 0; map_int<DEC_name.size(); ++map_int){
+      Track_CheckDetector[DEC_name.at(map_int)].clear();
+   }
 
    KODEL_Tree->Branch("Info_NumTrack",           &NumTrack);
    KODEL_Tree->Branch("Info_NumMuonTrack",       &NumMuonTrack);
 
+   KODEL_Tree->Branch("Strip_DEC_Type",          &Strip_DEC_Type);
+   KODEL_Tree->Branch("Strip_Number",            &Strip_Number);
+   KODEL_Tree->Branch("Strip_ClusterIndex",      &Strip_ClusterIndex);
+
+   KODEL_Tree->Branch("Cluster_Index",           &Cluster_Index);
    KODEL_Tree->Branch("Cluster_DEC_Type",        &Cluster_DEC);
+   KODEL_Tree->Branch("Cluster_NumHits",         &Cluster_NumHits);
    KODEL_Tree->Branch("Cluster_PositionX",       &Cluster_positionX);
    KODEL_Tree->Branch("Cluster_PositionY",       &Cluster_positionY);
    KODEL_Tree->Branch("Cluster_SizeX",           &Cluster_sizeX);
@@ -302,13 +309,13 @@ void Tracking::Loop()
    KODEL_Tree->Branch("Track_PositionX",         &Track_positionX);                  // Track X Position
    KODEL_Tree->Branch("Track_PositionY",         &Track_positionY);                  // Track Y Position
    KODEL_Tree->Branch("Track_MeanTime",          &Track_time);                       // Mean Time of Track (Calibrated)
-   KODEL_Tree->Branch("Track_ClusterOnS1",       &Track_CheckDetectorS1);            // Check Cluster on each Detector
-   KODEL_Tree->Branch("Track_ClusterOnS2",       &Track_CheckDetectorS2);            // Check Cluster on each Detector
-   KODEL_Tree->Branch("Track_ClusterOnS3",       &Track_CheckDetectorS3);            // Check Cluster on each Detector
-   KODEL_Tree->Branch("Track_ClusterOnS4",       &Track_CheckDetectorS4);            // Check Cluster on each Detector
-   KODEL_Tree->Branch("Track_ClusterOnS5",       &Track_CheckDetectorS5);            // Check Cluster on each Detector
-   KODEL_Tree->Branch("Track_ClusterOnS6",       &Track_CheckDetectorS6);            // Check Cluster on each Detector
    KODEL_Tree->Branch("Track_isMuonTrack",       &Track_isMuonTrack);                // Check Track position
+
+   for(int map_int = 0; map_int<DEC_name.size(); ++map_int){
+      string DEC_name_ = DEC_name.at(map_int);
+      DEC_name_.erase(DEC_name_.find(" "),DEC_name_.size()-1);
+      KODEL_Tree->Branch(Form("Track_ClusterOn%s",DEC_name_.c_str()), &Track_CheckDetector[DEC_name.at(map_int)]);
+   }
 
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
@@ -317,7 +324,10 @@ void Tracking::Loop()
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-      if (jentry%(nentries/10) == 0 && jentry != 0) cout << "running " << jentry << "th event (" << jentry/(nentries/100) << "%)" << endl;
+      if (nentries>100 && (jentry+1)%(nentries/10) == 0 && jentry != 0) cout << "running " << jentry+1 << "th event (" << (jentry+1)/(nentries/100) << "%)" << endl;
+      if (nentries<=100) cout << "running " << jentry+1 << "th event" << endl;
+
+      NumPartition = 0;
       NumTrack = 0;
       NumMuonTrack = 0;
 
@@ -335,13 +345,10 @@ void Tracking::Loop()
       Track_positionX.clear();
       Track_positionY.clear();
       Track_time.clear();
-      Track_CheckDetectorS1.clear();
-      Track_CheckDetectorS2.clear();
-      Track_CheckDetectorS3.clear();
-      Track_CheckDetectorS4.clear();
-      Track_CheckDetectorS5.clear();
-      Track_CheckDetectorS6.clear();
       Track_isMuonTrack.clear();
+      for(int map_int = 0; map_int<DEC_name.size(); ++map_int){
+         Track_CheckDetector[DEC_name.at(map_int)].clear();
+      }
 
       for(int cluster_i=0;cluster_i<Cluster_DEC_Type->size();++cluster_i){
 
@@ -349,19 +356,25 @@ void Tracking::Loop()
          Cluster_time.push_back(Cluster_Time_M->at(cluster_i));
          Cluster_index.push_back(99);
 
-         size_partitionX = DEC_sizeX[Cluster_DEC_Type->at(cluster_i)] / (DEC_total[Cluster_DEC_Type->at(cluster_i)] / DEC_partition[Cluster_DEC_Type->at(cluster_i)]);
+         NumPartition = DEC_total[Cluster_DEC_Type->at(cluster_i)] / DEC_partition[Cluster_DEC_Type->at(cluster_i)];
+         size_partitionX = DEC_sizeX[Cluster_DEC_Type->at(cluster_i)] / NumPartition; 
          center_partitionX = size_partitionX * (Cluster_X->at(cluster_i) + 0.5);
 
-         size_stripY =  DEC_sizeY[Cluster_DEC_Type->at(cluster_i)] / DEC_partition[Cluster_DEC_Type->at(cluster_i)];
-         center_stripY = size_stripY * (Cluster_Y->at(cluster_i) + 0.5);
+         size_stripY    = (1+(int)(Cluster_X->at(cluster_i)))*DEC_sizeYN[Cluster_DEC_Type->at(cluster_i)];
+         size_stripY   -= (1+(int)(Cluster_X->at(cluster_i)))*DEC_sizeYW[Cluster_DEC_Type->at(cluster_i)];
+         size_stripY   /= NumPartition;
+         size_stripY   += DEC_sizeYW[Cluster_DEC_Type->at(cluster_i)];
+         center_stripY  = (DEC_sizeYW[Cluster_DEC_Type->at(cluster_i)]-size_stripY)/2;
+         size_stripY   /= DEC_partition[Cluster_DEC_Type->at(cluster_i)];
+         center_stripY += size_stripY * (Cluster_Y->at(cluster_i) + 0.5);
 
          strip_max = -1000;
          strip_min = 1000;
          for(int strip_i=0;strip_i<Strip_Number->size();++strip_i){
-             if(Strip_ClusterIndex->at(strip_i) == Cluster_Index->at(cluster_i)){
+             if(Strip_ClusterIndex->at(strip_i) == Cluster_Index->at(cluster_i) && Strip_DEC_Type->at(strip_i) == Cluster_DEC_Type->at(cluster_i)){
                  temp_strip = (Strip_Number->at(strip_i)-1)%DEC_partition[Cluster_DEC_Type->at(cluster_i)];
-                 if (strip_max < temp_y) strip_max = temp_strip;
-                 if (strip_min > temp_y) strip_min = temp_strip;
+                 if (strip_max < temp_strip) strip_max = temp_strip;
+                 if (strip_min > temp_strip) strip_min = temp_strip;
              } 
          }
          if (strip_max == -1000 && strip_min == 1000) {
@@ -371,28 +384,29 @@ void Tracking::Loop()
             size_clusterY = size_stripY * fabs(strip_max - Cluster_Y->at(cluster_i));
          } else {
             size_clusterY = size_stripY * fabs(Cluster_Y->at(cluster_i) - strip_min);
+            if(size_clusterY == 0) size_clusterY = size_stripY/2;
          }
 
          if(DEC_rotation[Cluster_DEC_Type->at(cluster_i)] == 0){
             temp_x  = center_partitionX;
             temp_y  = center_stripY;
-            temp_dx = size_partitionX;
+            temp_dx = size_partitionX/2;
             temp_dy = size_clusterY;
          } else if(DEC_rotation[Cluster_DEC_Type->at(cluster_i)] == 90){
             temp_x  = center_stripY;
-            temp_y  = DEC_sizeY[Cluster_DEC_Type->at(cluster_i)] - center_partitionX; 
+            temp_y  = DEC_sizeX[Cluster_DEC_Type->at(cluster_i)] - center_partitionX; 
             temp_dx = size_clusterY;
-            temp_dy = size_partitionX;
+            temp_dy = size_partitionX/2;
          } else if(DEC_rotation[Cluster_DEC_Type->at(cluster_i)] == 180){
             temp_x  = DEC_sizeX[Cluster_DEC_Type->at(cluster_i)] - center_partitionX;
-            temp_y  = DEC_sizeY[Cluster_DEC_Type->at(cluster_i)] - center_stripY;
-            temp_dx = size_partitionX;
+            temp_y  = (DEC_sizeYW[Cluster_DEC_Type->at(cluster_i)]/2) + (DEC_sizeYN[Cluster_DEC_Type->at(cluster_i)]/2) - center_stripY;
+            temp_dx = size_partitionX/2;
             temp_dy = size_clusterY;
          } else if(DEC_rotation[Cluster_DEC_Type->at(cluster_i)] == 270){
-            temp_x  = DEC_sizeX[Cluster_DEC_Type->at(cluster_i)] - center_stripY; 
+            temp_x  = DEC_sizeYW[Cluster_DEC_Type->at(cluster_i)] - center_stripY; 
             temp_y  = center_partitionX;
             temp_dx = size_clusterY;
-            temp_dy = size_partitionX;
+            temp_dy = size_partitionX/2;
          } else {
             cerr << endl << "\tERROR : Check SET config File";
             cerr << endl << "\tRotation Angle : " << DEC_rotation[Cluster_DEC_Type->at(cluster_i)] << endl << endl;
@@ -419,7 +433,8 @@ void Tracking::Loop()
                Cluster_index.at(i_f) = track_temp_index;
                check_init = true;
             }
-            for(int i_s=i_f;i_s<Cluster_DEC.size();++i_s){
+            for(int i_s=i_f+1;i_s<Cluster_DEC.size();++i_s){
+               if(i_s==Cluster_DEC.size()) continue;
                Cluster_sizeX.at(i_s)>Cluster_sizeX.at(i_f)?delta_clusterX=Cluster_sizeX.at(i_s):delta_clusterX=Cluster_sizeX.at(i_f);
                Cluster_sizeY.at(i_s)>Cluster_sizeY.at(i_f)?delta_clusterY=Cluster_sizeY.at(i_s):delta_clusterY=Cluster_sizeY.at(i_f);
                if( (fabs(Cluster_positionX.at(i_f) - Cluster_positionX.at(i_s)) < CUT_Delta_X + delta_clusterX) && 
@@ -494,12 +509,7 @@ void Tracking::Loop()
              Track_isMuonTrack.push_back(false);
          }
          for(map<string,bool>::iterator it = check_track.begin();it != check_track.end();++it) { 
-            if((it->first).find("S1") != std::string::npos) Track_CheckDetectorS1.push_back(it->second); 
-            if((it->first).find("S2") != std::string::npos) Track_CheckDetectorS2.push_back(it->second); 
-            if((it->first).find("S3") != std::string::npos) Track_CheckDetectorS3.push_back(it->second); 
-            if((it->first).find("S4") != std::string::npos) Track_CheckDetectorS4.push_back(it->second); 
-            if((it->first).find("S5") != std::string::npos) Track_CheckDetectorS5.push_back(it->second); 
-            if((it->first).find("S6") != std::string::npos) Track_CheckDetectorS6.push_back(it->second); 
+            Track_CheckDetector[it->first].push_back(it->second);
             if(check_track[it->first]) ++num_detector;
          }
          Track_NDetectors.push_back(num_detector);

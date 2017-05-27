@@ -89,8 +89,8 @@ void KODELPlot(string rootfile_name, string mapfile_name, string setfile_name, s
          if (!getline( ss_line, temp_string, '\t' )) break;
             temp_input.push_back(temp_string);
       }
-      if (temp_input.size()>1) {
-         DEC_rotation[temp_input.at(0)]  = atoi((temp_input.at(6)).c_str());
+      if (temp_input.size()>7) {
+         DEC_rotation[temp_input.at(0)]  = atoi((temp_input.at(7)).c_str());
       }
    }
 
@@ -178,10 +178,10 @@ void KODELPlot(string rootfile_name, string mapfile_name, string setfile_name, s
       test_x_end   = 20;
    }
 
-   TH2F* h_test     = new TH2F("h_test", "h_test", histo_width, histo_x_start, histo_x_end, histo_height, histo_y_start, histo_y_end);
-   TH1F* h_TimeCal  = new TH1F("h_TimeCal", "h_TimeCal", 800, -400, 400);
-   TH1F* h_NHits    = new TH1F("h_NHits", "h_NHits", DEC_total[dec_name] , 0, DEC_total[dec_name] );
-   TH1F* h_test2    = new TH1F("h_test2", "h_test2", test_x_end-test_x_start, test_x_start, test_x_end);
+   TH2D* h_test     = new TH2D("h_test", "h_test", histo_width, histo_x_start, histo_x_end, histo_height, histo_y_start, histo_y_end);
+   TH1D* h_TimeCal  = new TH1D("h_TimeCal", "h_TimeCal", 800, -400, 400);
+   TH1D* h_NHits    = new TH1D("h_NHits", "h_NHits", DEC_total[dec_name] , 0, DEC_total[dec_name] );
+   TH1D* h_test2    = new TH1D("h_test2", "h_test2", test_x_end-test_x_start, test_x_start, test_x_end);
 
    TFile* f_input = new TFile(Form("%s",rootfile_name.c_str()));
    TTree* t_input = (TTree*)f_input->Get("KODEL_Tree");
@@ -214,9 +214,17 @@ void KODELPlot(string rootfile_name, string mapfile_name, string setfile_name, s
                   h_TimeCal->Fill(TDC_Time_Cal->at(i));
                   h_test2->Fill(TDC_Time->at(i));
                   if(event_number == "All") {
-                     h_test->Fill( histo_x_sign*(((Strip_Number->at(i)-1)/num_strip)+0.5) ,  histo_y_sign*(((Strip_Number->at(i)-1)%num_strip)+0.5));
+                     if(DEC_rotation[dec_name] == 0 || DEC_rotation[dec_name] == 180) {
+                        h_test->Fill( histo_x_sign*(((Strip_Number->at(i)-1)/num_strip)+0.5) , histo_y_sign*(((Strip_Number->at(i)-1)%num_strip)+0.5));
+                     } else {
+                        h_test->Fill( histo_y_sign*(((Strip_Number->at(i)-1)%num_strip)+0.5) , histo_x_sign*(((Strip_Number->at(i)-1)/num_strip)+0.5));
+                     }
                   } else {
-                     h_test->Fill( histo_x_sign*(((Strip_Number->at(i)-1)/num_strip)+0.5) ,  histo_y_sign*(((Strip_Number->at(i)-1)%num_strip)+0.5),Strip_ClusterIndex->at(i));
+                     if(DEC_rotation[dec_name] == 0 || DEC_rotation[dec_name] == 180) {
+                        h_test->Fill( histo_x_sign*(((Strip_Number->at(i)-1)/num_strip)+0.5) , histo_y_sign*(((Strip_Number->at(i)-1)%num_strip)+0.5), Strip_ClusterIndex->at(i));
+                     } else {
+                        h_test->Fill( histo_y_sign*(((Strip_Number->at(i)-1)%num_strip)+0.5) , histo_x_sign*(((Strip_Number->at(i)-1)/num_strip)+0.5), Strip_ClusterIndex->at(i));
+                     }
                   }
                }
             }
@@ -269,8 +277,10 @@ void KODELPlot(string rootfile_name, string mapfile_name, string setfile_name, s
    h_test->SetTitle(Form("%s;%s;%s",title_name.c_str(),x_title.c_str(),y_title.c_str()));
 
    c_test->cd();
-   if(DEC_rotation[dec_name] == 0 || DEC_rotation[dec_name] == 90) {
+   if(DEC_rotation[dec_name] == 0){
       h_test->Draw("text col y+");
+   } else if(DEC_rotation[dec_name] == 90) {
+      h_test->Draw("text col x+ y+");
    } else {
       h_test->Draw("text col");
    }

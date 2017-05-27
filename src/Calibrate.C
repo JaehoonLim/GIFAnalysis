@@ -72,7 +72,13 @@ int main(int argc, char **argv){
     TH1F* Strip_mean = new TH1F("Strip_mean","Strip_mean",600,0,600);
     TH1F* BackSubMean = new TH1F("BackSubMean","BackSubMean",600,0,600);
 
-    outfile << "// CALIBRATION config file" << endl << "//" << endl << "// TDCchannel'\\t'" << '\t' << "CalibratedTime" << endl << "//" << endl;
+    outfile << "// CALIBRATION config file" << endl << "//" << endl;
+    outfile << "// InputRootFile          : " << argv[1] << endl;
+    outfile << "// MAPConfigFile          : " << argv[2] << endl;
+    outfile << "// Cut_PercentageAfterCut : " << cut_entry << endl;
+    outfile << "// Cut_TimeWindow         : " << cut_timewindow << endl;
+    outfile << "// Cut_RMSAfterCut        : " << cut_rms << endl << "//" << endl;
+    outfile << "// TDCchannel'\\t'" << '\t' << "CalibratedTime" << endl << "//" << endl;
 
     while (infile) {
         string s_line;
