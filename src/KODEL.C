@@ -319,9 +319,10 @@ void KODEL::Loop()
       for(int i_Channel=0; i_Channel<TDC_channel->size(); ++i_Channel){
          if (TDC_channel->at(i_Channel) == 0) continue;
          if (TDCtoCAL.find( TDC_channel->at(i_Channel) ) == TDCtoCAL.end()) {
-            cerr << endl << "\tERROR : Check CAL config File";
-            cerr << endl << "\tTDC channel : " << TDC_channel->at(i_Channel) << endl << endl;
-            exit(EXIT_FAILURE);
+            //cerr << endl << "\tERROR : Check CAL config File";
+            //cerr << endl << "\tTDC channel : " << TDC_channel->at(i_Channel) << endl << endl;
+            //exit(EXIT_FAILURE);
+            continue;
          }
          time_cal_temp = TDC_TimeStamp->at(i_Channel) - TDCtoCAL[TDC_channel->at(i_Channel)];
          if (time_cal_temp > CUT_Time_Start && time_cal_temp < CUT_Time_End) { // Timing Cut

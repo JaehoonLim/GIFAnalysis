@@ -7,6 +7,11 @@
 
 void TrackEff(string last_hv_root, string trigger_condition, string eff_dec){
 
+   if(eff_dec.size() == 0){
+      cerr << "ERROR : No Target Chamber" << endl;
+      exit(EXIT_FAILURE);
+   }
+
    gROOT->Reset();
    gROOT->SetStyle("Plain");
    gStyle->SetOptStat(0);	
@@ -15,45 +20,60 @@ void TrackEff(string last_hv_root, string trigger_condition, string eff_dec){
 
    // FIXME ////////////////
    string hist_title = "";
-   Float_t HV[9]      = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-   Float_t HV_Err[9]  = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+   Float_t HV[20]      = {0.0};
+   Float_t HV_Err[20]  = {0.0};
    /////////////////////////
 
-   TFile *f_trk[9];
-   TTree *t_trk[9];
-   Float_t Eff[9];
-   Float_t Eff_Err[9];
+   TFile *f_trk[20];
+   TTree *t_trk[20];
+   Float_t Eff[20];
+   Float_t Eff_Err[20];
 
+   for(string::size_type pos = 0; (pos = trigger_condition.find("t", pos)) != string::npos;){
+      trigger_condition.replace(pos, 1, "T");
+      pos += 1;
+   }
    for(string::size_type pos = 0; (pos = trigger_condition.find("s", pos)) != string::npos;){
       trigger_condition.replace(pos, 1, "S");
+      pos += 1;
+   }
+   string s_den = trigger_condition; 
+   for(string::size_type pos = 0; (pos = s_den.find("T", pos)) != string::npos;){
+      s_den.replace(pos, 1, "Track_ClusterOnT");
+      pos += 16;
+   }
+
+   for(string::size_type pos = 0; (pos = eff_dec.find("t", pos)) != string::npos;){
+      eff_dec.replace(pos, 1, "T");
       pos += 1;
    }
    for(string::size_type pos = 0; (pos = eff_dec.find("s", pos)) != string::npos;){
       eff_dec.replace(pos, 1, "S");
       pos += 1;
    }
-
    string s_num = eff_dec;
-   string s_den = trigger_condition; 
-   for(string::size_type pos = 0; (pos = s_num.find("S", pos)) != string::npos;){
-      s_num.replace(pos, 1, "Track_ClusterOnS");
-      pos += 16;
-   }
-   for(string::size_type pos = 0; (pos = s_den.find("S", pos)) != string::npos;){
-      s_den.replace(pos, 1, "Track_ClusterOnS");
+   for(string::size_type pos = 0; (pos = s_num.find("T", pos)) != string::npos;){
+      s_num.replace(pos, 1, "Track_ClusterOnT");
       pos += 16;
    }
 
-   TCut cut_num = Form("Track_isMuonTrack && (%s) && (%s)", s_den.c_str(), s_num.c_str());
-   TCut cut_den = Form("Track_isMuonTrack && (%s)", s_den.c_str());
+   if(s_den.size()>0){
+      s_den = "Track_isMuonTrack && (" + s_den + ")";
+   } else {
+      s_den = "Track_isMuonTrack";
+   }
+
+   TCut cut_num = Form("%s && (%s)", s_den.c_str(), s_num.c_str());
+   TCut cut_den = Form("%s", s_den.c_str());
 
    int HV_point = (last_hv_root.find("HV"))+2;
-   int num_HV = atoi(last_hv_root.substr(HV_point,1).c_str());
+   int daq_pos = (last_hv_root.find("DAQ"))-1;
+   int num_HV = atoi(last_hv_root.substr(HV_point,daq_pos-HV_point).c_str());
 
    TCanvas* c_test = new TCanvas("c_test","c_test",1,1);
 
    for(int i=0; i<num_HV; ++i){
-      f_trk[i] = new TFile(last_hv_root.replace(HV_point,1,Form("%d",i+1)).c_str());
+      f_trk[i] = new TFile(last_hv_root.replace(HV_point,daq_pos-HV_point,Form("%d",i+1)).c_str());
       t_trk[i] = (TTree*)f_trk[i]->Get("KODEL_Tree");
       TH1F* h_num = new TH1F("h_num", "h_num", 2, 0, 2);
       TH1F* h_den = new TH1F("h_den", "h_den", 2, 0, 2);
