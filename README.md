@@ -48,7 +48,7 @@ __4. Make trolly SET file - SET*__
   DetectorName'\t' Order'\t' DetectorWidth(X)'\t' DetectorHeight(Y-Wide)'\t' DetectorHeight(Y-Narrow)'\t' DetectorPosition(X)'\t' DetectorPositioY(Y)'\t' RotationAngle(ClockWise)'\n'    
   
   ex)  
-  T3S5 (KODEL_DG12)       4       800     320     250     400     70      0
+  T3S5 (KODEL_DG12)       4       800     320     250     400     70      0  
   T3S1 (GT_16)    3       800     480     350     0       65      180
   
   DetectorWidth, Height, PositionX, PositionY on example file is not real value. (just for tracking test)  
