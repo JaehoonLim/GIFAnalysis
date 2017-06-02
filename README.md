@@ -65,3 +65,22 @@ __5. Tracking - Tracking.C -> DAQ-Trk.root__
   Cut_Y : Distance in Y-axis  
   Cut_Time : Difference in Time  
   
+__6. Ploters - KODELPlot.C, TrackPlot.C, TrackEff.C__  
+  
+  __KODELPlot.C__  
+  root 'KODELPlot.C("DAQ-KODEL.root","MAPConfigFile","SETConfigFile","DetectorName","Cluster or Hit","EventNumber or All")'  
+  option "Cluster" will show you : Cluster Position, Cluster Multiplicity, Cluster Size, Cluster Fastest Hit Time  
+  option "Hit" will show you : Hit Position, Hit Multiplicity, TDC Hit Time, Calibrated Hit Time  
+  
+  __TrackPlot.C__  
+  root 'TrackPlot.C("DAQ-Trk.root","MAPConfigFile","SETConfigFile","Muon or All","EventNumber or All")'  
+  option "Muon" will show you only Muon Track  
+  option "All" will show you All Track
+  
+  __TrackEff.C__  
+  root 'TrackEff.C("Last HV point DAQ-Trk.root","Additional Trigger or Simple","DetectorName")'  
+  option "Simple" will calculate efficiency by hit  
+  Additional Trigger option will calculate efficiency with respect to additional trigger by using tracking  
+  Additional Trigger ex)  
+  "", "T1S1", "T1S1&&T1S2", "T1S1||T1S2", etc  
+  
