@@ -32,9 +32,9 @@ __3. Clustering - KODEL.C -> DAQ-KODEL.root__
   
   InputRootFile : DAQ.root file  
   MAPConfigFile : Map file(#1)  
-  Delta_Strip : Definition of adjacent strip for clustering (GIF++ clustering : 1)  
-  Delta_Partition : Definition of adjacent partition for clustering (GIF++ clustering : 0 - do not use)  
-  Delta_Time : Definition of adjacent time for clustering (GIF++ clustering : do not use adjacent time / using beam timing cut)  
+  Delta_Strip : Definition of adjacent strip for clustering  
+  Delta_Partition : Definition of adjacent partition for clustering  
+  Delta_Time : Definition of adjacent time for clustering  
   
 __4. Make trolly SET file - SET*__
   
