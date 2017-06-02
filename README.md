@@ -43,13 +43,13 @@ __4. Make trolly SET file - SET*__
   BEAM'\t' X_mean'\t' X_error'\t' Y_mean'\t' Y_error'\t' Time_mean'\t' Time_error'\n'
   
   ex)  
-  BEAM    1.5       0.5       27.5      5       0       30  
+  BEAM    600     50      275     50      0       30
   
-  DetectorName'\t' Order'\t' DetectorWidth(x)'\t' DetectorHeight(y)'\t' DetectorPosition(x)'\t' DetectorPosition(y)'\t' RotationAngle'\n'  
+  DetectorName'\t' Order'\t' DetectorWidth(X)'\t' DetectorHeight(Y-Wide)'\t' DetectorHeight(Y-Narrow)'\t' DetectorPosition(X)'\t' DetectorPositioY(Y)'\t' RotationAngle(ClockWise)'\n'    
   
   ex)  
-  T3S5 (KODEL_DG12)       4       2       32      1       7      0  
-  T3S1 (GT_16)    3       2       48      0       0       180  
+  T3S5 (KODEL_DG12)       4       800     320     250     400     70      0
+  T3S1 (GT_16)    3       800     480     350     0       65      180
   
   DetectorWidth, Height, PositionX, PositionY on example file is not real value. (just for tracking test)  
   You have to update based on  
