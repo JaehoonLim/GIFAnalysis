@@ -110,7 +110,8 @@ void TrackEff(string last_hv_root, string trigger_condition, string eff_dec){
       t_trk[i]->Draw(Form("%s >> h_den",s_num.c_str()), cut_den);
       Eff[i] = 100. * h_num->GetEntries() / h_den->GetEntries();
       if(h_num->GetEntries() > 0 && h_den->GetEntries() > 0){
-         Eff_Err[i] = 100. * h_num->GetEntries()/h_den->GetEntries() * sqrt(1./h_num->GetEntries()+1./h_den->GetEntries());
+   //      Eff_Err[i] = 100. * h_num->GetEntries()/h_den->GetEntries() * sqrt(1./h_num->GetEntries()+1./h_den->GetEntries());
+         Eff_Err[i] = 100. * sqrt( h_num->GetEntries() / h_den->GetEntries() * ( 1. - ( h_num->GetEntries() / h_den->GetEntries() ) ) / 5000.0 );
       } else {
          Eff_Err[i] = 0.0;
       }
@@ -176,16 +177,24 @@ void TrackEff(string last_hv_root, string trigger_condition, string eff_dec){
    fitfunc->SetLineStyle(2);
    fitfunc->SetLineWidth(3);
    fitfunc->SetLineColor(kRed);
-   fitfunc->SetParameter(0,100.0);
-   fitfunc->SetParameter(2,(HV[0]+HV[num_HV-1])/2);
-   fitfunc->SetParLimits(2,HV[0],HV[num_HV-1]);
+   fitfunc->SetParameter(0,90);
+   fitfunc->SetParLimits(0,0,100);
+   fitfunc->SetParameter(2,HV[0]);
 
    graph_Plot->SetLineStyle(1);
    graph_Plot->SetLineWidth(3);
    c_eff->Update();
-   graph_Plot->Fit("fitfunc","","L",HV[0]-HV[num_HV-1],2*HV[num_HV-1]);
+   graph_Plot->Fit("fitfunc","","L",0,2*HV[num_HV-1]);
 
-   TLegend* sigmoid_legend = new TLegend(0.60, 0.15, 0.88, 0.30);
+   float HVWP = fitfunc->GetX(0.95*fitfunc->GetParameter(0),HV[0],HV[num_HV-1],0.01) + 100;
+   float EFWP = fitfunc->Eval(HVWP);
+   TLine* wpline = new TLine();
+   wpline->SetLineStyle(2);
+   wpline->SetLineColor(kBlue);
+   wpline->DrawLine(Frame_x_start,EFWP,Frame_x_end,EFWP);
+   wpline->DrawLine(HVWP,0,HVWP,110);
+
+   TLegend* sigmoid_legend = new TLegend(0.58, 0.15, 0.89, 0.37);
    sigmoid_legend->SetFillColor(0);
    sigmoid_legend->SetTextSize(0.03);
    sigmoid_legend->SetNColumns(2);
@@ -193,8 +202,14 @@ void TrackEff(string last_hv_root, string trigger_condition, string eff_dec){
    sigmoid_legend->AddEntry((TObject*)0,Form("%0.4f / %d",fitfunc->GetChisquare(), fitfunc->GetNDF()),"");
    sigmoid_legend->AddEntry((TObject*)0,"#epsilon_{MAX}","");
    sigmoid_legend->AddEntry((TObject*)0,Form("%0.2f #pm %0.2f",fitfunc->GetParameter(0),fitfunc->GetParError(0)),"");
+   sigmoid_legend->AddEntry((TObject*)0,"#lambda","");
+   sigmoid_legend->AddEntry((TObject*)0,Form("%0.4f #pm %0.4f",fitfunc->GetParameter(1),fitfunc->GetParError(1)),"");
    sigmoid_legend->AddEntry((TObject*)0,"HV_{50}","");
    sigmoid_legend->AddEntry((TObject*)0,Form("%0.2f #pm %0.2f",fitfunc->GetParameter(2),fitfunc->GetParError(2)),"");
+   sigmoid_legend->AddEntry((TObject*)0,"HV_{WP}","");
+   sigmoid_legend->AddEntry((TObject*)0,Form("%0.2f",HVWP),"");
+   sigmoid_legend->AddEntry((TObject*)0,"Eff.@WP","");
+   sigmoid_legend->AddEntry((TObject*)0,Form("%0.2f",EFWP),"");
    sigmoid_legend->Draw();
 
    c_eff->SaveAs(Form("%sEff_%s_sigmoid.png",last_hv_root.c_str(),eff_dec.c_str()));
