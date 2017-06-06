@@ -96,7 +96,6 @@ void TrackEff(string last_hv_root, string trigger_condition, string eff_dec){
    int num_HV = atoi(last_hv_root.substr(HV_point,daq_pos-HV_point).c_str());
 
    TCanvas* c_test = new TCanvas("c_test","c_test",1,1);
-   float EffMax = 0.0; 
 
    for(int i=0; i<num_HV; ++i){
       HV_point = (last_hv_root.find("HV"))+2;
@@ -110,12 +109,9 @@ void TrackEff(string last_hv_root, string trigger_condition, string eff_dec){
       t_trk[i]->Draw(Form("%s >> h_num",s_num.c_str()), cut_num);
       t_trk[i]->Draw(Form("%s >> h_den",s_num.c_str()), cut_den);
       Eff[i] = 100. * h_num->GetEntries() / h_den->GetEntries();
-      if(EffMax < Eff[i]) EffMax = Eff[i];
       if(h_num->GetEntries() > 0 && h_den->GetEntries() > 0){
    //      Eff_Err[i] = 100. * h_num->GetEntries()/h_den->GetEntries() * sqrt(1./h_num->GetEntries()+1./h_den->GetEntries());
-         Eff_Err[i] = 100. * 
-                      sqrt( h_num->GetEntries() / h_den->GetEntries() 
-                            * (1.- ( h_num->GetEntries() / h_den->GetEntries() ) ) / 5000.0 );
+         Eff_Err[i] = 100. * sqrt( h_num->GetEntries() / h_den->GetEntries() * ( 1. - ( h_num->GetEntries() / h_den->GetEntries() ) ) / 5000.0 );
       } else {
          Eff_Err[i] = 0.0;
       }
