@@ -384,7 +384,7 @@ void KODEL::Loop()
             if (Strip_DEC_Type[i_time] == DEC_NAME->first) {
                temp_time = TDC_Time_Cal[i_time];
                while (sort_time.find( temp_time ) != sort_time.end()) {
-                  temp_time+=0.0001;
+                  temp_time+=0.001;
                   if(debug_cout) cout << "While : " << temp_time << endl;
                }
                sort_time[temp_time] = i_time;
