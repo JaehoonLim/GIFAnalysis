@@ -67,17 +67,14 @@ __5. Tracking - Tracking.C -> DAQ-Trk.root__
   
 __6. Ploters - KODELPlot.C, TrackPlot.C, TrackEff.C__  
   
-  __KODELPlot.C__  
   __root 'KODELPlot.C("DAQ-KODEL.root","MAPConfigFile","SETConfigFile","DetectorName","Cluster or Hit","EventNumber or All")'__  
   option "Cluster" will show you : Cluster Position, Cluster Multiplicity, Cluster Size, Cluster Fastest Hit Time  
   option "Hit" will show you : Hit Position, Hit Multiplicity, TDC Hit Time, Calibrated Hit Time  
   
-  __TrackPlot.C__  
   __root 'TrackPlot.C("DAQ-Trk.root","MAPConfigFile","SETConfigFile","Muon or All","EventNumber or All")'__  
   option "Muon" will show you only Muon Track  
   option "All" will show you All Track
   
-  __TrackEff.C__  
   __root 'TrackEff.C("Last HV point DAQ-Trk.root","Additional Trigger or Simple","DetectorName")'__  
   option "Simple" will calculate efficiency by hit  
   "Additional Trigger" option will calculate efficiency with respect to additional trigger by using tracking  
@@ -86,20 +83,17 @@ __6. Ploters - KODELPlot.C, TrackPlot.C, TrackEff.C__
   
 __7. Printers - HitRate.C, ClusterRate.C, ClusterSizeAfterTracking.C - Need Compile__  
   
-  __HitRate.C__  
   __HitRate Last_HV_point_DAQ.root MAPConfigFile DetectorName Partition PartitionArea__  
   or  
   __HitRate Last_HV_point_DAQ.root MAPConfigFile Partition__ (For KODEL Chamber)  
   option "Partition" ex) A, B, C, All
   
-  __ClusterRate.C__  
   __ClusterRate Last_HV_point_DAQ-KODEL.root DetectorName Partition PartitionArea__  
   or  
   __ClusterRate Last_HV_point_DAQ-KODEL.root Partition__ (For KODEL Chamber)  
   For option "Partition", You have to check __Partition Cut__ on MAPConfigFile(#1) When you run Clustering(#3)  
     
-  __ClusterSizeAfterTracking.C__  
-  __ClusterSize Last_HV_point_DAQ-Trk.root DetectorName__  
+  __ClusterSizeAfterTracking Last_HV_point_DAQ-Trk.root DetectorName__   
   or  
-  __ClusterSize Last_HV_point_DAQ-Trk.root__ (For KODEL Chamber)  
+  __ClusterSizeAfterTracking Last_HV_point_DAQ-Trk.root__ (For KODEL Chamber)  
   
