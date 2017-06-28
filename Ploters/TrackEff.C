@@ -19,8 +19,12 @@ void TrackEff(string last_hv_root, string trigger_condition, string eff_dec){
    gStyle->SetPalette(1);
 
    // FIXME ////////////////
+   Float_t sigmoid_epsilon = 90.0; 
+   Float_t sigmoid_lambda  = 1.0; // ~1.0 for HVPoint or ~0.01 for HV_eff; 
+   Float_t sigmoid_hv50    = 1.0; // ~1.0 for HVPoint or ~7000.0 for HV_eff; 
+
    string hist_title = "";
-   Float_t HV[20]      = {0.0};
+   Float_t HV[20]      = {0.0};   // 0.0 for HVPoint or You can use HV_eff
    Float_t HV_Err[20]  = {0.0};
    /////////////////////////
 
@@ -110,7 +114,7 @@ void TrackEff(string last_hv_root, string trigger_condition, string eff_dec){
       t_trk[i]->Draw(Form("%s >> h_den",s_num.c_str()), cut_den);
       Eff[i] = 100. * h_num->GetEntries() / h_den->GetEntries();
       if(h_num->GetEntries() > 0 && h_den->GetEntries() > 0){
-   //      Eff_Err[i] = 100. * h_num->GetEntries()/h_den->GetEntries() * sqrt(1./h_num->GetEntries()+1./h_den->GetEntries());
+         //Eff_Err[i] = 100. * h_num->GetEntries()/h_den->GetEntries() * sqrt(1./h_num->GetEntries()+1./h_den->GetEntries());
          Eff_Err[i] = 100. * sqrt( h_num->GetEntries() / h_den->GetEntries() * ( 1. - ( h_num->GetEntries() / h_den->GetEntries() ) ) / 5000.0 );
       } else {
          Eff_Err[i] = 0.0;
@@ -138,6 +142,7 @@ void TrackEff(string last_hv_root, string trigger_condition, string eff_dec){
       Frame_x_start = HV[0] - 100;
       Frame_x_end   = HV[num_HV-1] + 100;
    } 
+
    TH1F* Frame_eff = (TH1F*)c_eff->DrawFrame(Frame_x_start, 0, Frame_x_end, 110);
    Frame_eff->GetYaxis()->SetTitle("Efficiency [%]");
    Frame_eff->GetYaxis()->SetTitleOffset(1.1);
@@ -173,13 +178,16 @@ void TrackEff(string last_hv_root, string trigger_condition, string eff_dec){
    double sigmoid(double *x, double *par){
       return par[0]/(1+exp(-1*par[1]*(x[0]-par[2])));
    }
-   TF1 *fitfunc = new TF1("fitfunc",sigmoid,HV[0]-HV[num_HV-1],2*HV[num_HV-1],3);
+   TF1 *fitfunc = new TF1("fitfunc",sigmoid,0,Frame_x_end,3);
    fitfunc->SetLineStyle(2);
    fitfunc->SetLineWidth(3);
    fitfunc->SetLineColor(kRed);
-   fitfunc->SetParameter(0,90);
    fitfunc->SetParLimits(0,0,100);
-   fitfunc->SetParameter(2,HV[0]);
+   fitfunc->SetParLimits(1,0,100);
+   fitfunc->SetParLimits(2,HV[0],HV[num_HV-1]);
+   fitfunc->SetParameter(0,sigmoid_epsilon);
+   fitfunc->SetParameter(1,sigmoid_lambda);
+   fitfunc->SetParameter(2,sigmoid_hv50);
 
    graph_Plot->SetLineStyle(1);
    graph_Plot->SetLineWidth(3);
