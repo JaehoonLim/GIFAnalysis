@@ -125,6 +125,7 @@ void KODELPlot(string rootfile_name, string mapfile_name, string setfile_name, s
    sprintf(strip_end,"%d",num_strip);
    string y_bin_start = "1";
    string y_bin_end   = strip_end;
+   int zmax = 0;
 
    if(DEC_rotation[dec_name] == 90 || DEC_rotation[dec_name] == 270) {
       histo_width   = num_strip;
@@ -155,7 +156,6 @@ void KODELPlot(string rootfile_name, string mapfile_name, string setfile_name, s
    int histo_y_end   = histo_height;
    string temp_swap;
 
-
    if(histo_x_sign == -1) {
       histo_x_start = -1 * histo_width;
       histo_x_end   = 0;
@@ -179,6 +179,7 @@ void KODELPlot(string rootfile_name, string mapfile_name, string setfile_name, s
    }
 
    TH2D* h_test     = new TH2D("h_test", "h_test", histo_width, histo_x_start, histo_x_end, histo_height, histo_y_start, histo_y_end);
+   TH3D* h_test3d   = new TH3D("h_test3d", "h_test3d", histo_width, histo_x_start, histo_x_end, 200, -100, 100, histo_height, histo_y_start, histo_y_end);
    TH1D* h_TimeCal  = new TH1D("h_TimeCal", "h_TimeCal", 800, -400, 400);
    TH1D* h_NHits    = new TH1D("h_NHits", "h_NHits", DEC_total[dec_name] , 0, DEC_total[dec_name] );
    TH1D* h_test2    = new TH1D("h_test2", "h_test2", test_x_end-test_x_start, test_x_start, test_x_end);
@@ -211,19 +212,24 @@ void KODELPlot(string rootfile_name, string mapfile_name, string setfile_name, s
          if(type_name == "Hits"){
             for(int i = 0; i < Strip_Number->size(); ++i){
                if(Strip_DEC_Type->at(i) == dec_name){ 
+                  if(zmax < Strip_ClusterIndex->at(i)) zmax = Strip_ClusterIndex->at(i);
                   h_TimeCal->Fill(TDC_Time_Cal->at(i));
                   h_test2->Fill(TDC_Time->at(i));
                   if(event_number == "All") {
                      if(DEC_rotation[dec_name] == 0 || DEC_rotation[dec_name] == 180) {
                         h_test->Fill( histo_x_sign*(((Strip_Number->at(i)-1)/num_strip)+0.5) , histo_y_sign*(((Strip_Number->at(i)-1)%num_strip)+0.5));
+                        h_test3d->Fill( histo_x_sign*(((Strip_Number->at(i)-1)/num_strip)+0.5), TDC_Time_Cal->at(i), histo_y_sign*(((Strip_Number->at(i)-1)%num_strip)+0.5));
                      } else {
                         h_test->Fill( histo_y_sign*(((Strip_Number->at(i)-1)%num_strip)+0.5) , histo_x_sign*(((Strip_Number->at(i)-1)/num_strip)+0.5));
+                        h_test3d->Fill( histo_y_sign*(((Strip_Number->at(i)-1)%num_strip)+0.5), TDC_Time_Cal->at(i), histo_x_sign*(((Strip_Number->at(i)-1)/num_strip)+0.5));
                      }
                   } else {
                      if(DEC_rotation[dec_name] == 0 || DEC_rotation[dec_name] == 180) {
                         h_test->Fill( histo_x_sign*(((Strip_Number->at(i)-1)/num_strip)+0.5) , histo_y_sign*(((Strip_Number->at(i)-1)%num_strip)+0.5), Strip_ClusterIndex->at(i));
+                        h_test3d->Fill( histo_x_sign*(((Strip_Number->at(i)-1)/num_strip)+0.5), TDC_Time_Cal->at(i), histo_y_sign*(((Strip_Number->at(i)-1)%num_strip)+0.5), Strip_ClusterIndex->at(i));
                      } else {
                         h_test->Fill( histo_y_sign*(((Strip_Number->at(i)-1)%num_strip)+0.5) , histo_x_sign*(((Strip_Number->at(i)-1)/num_strip)+0.5), Strip_ClusterIndex->at(i));
+                        h_test3d->Fill( histo_y_sign*(((Strip_Number->at(i)-1)%num_strip)+0.5), TDC_Time_Cal->at(i), histo_x_sign*(((Strip_Number->at(i)-1)/num_strip)+0.5), Strip_ClusterIndex->at(i));
                      }
                   }
                }
@@ -236,12 +242,15 @@ void KODELPlot(string rootfile_name, string mapfile_name, string setfile_name, s
          } else if(type_name == "Clusters"){
             for(int i = 0; i < Cluster_DEC_Type->size(); ++i){
                if(Cluster_DEC_Type->at(i) == dec_name){
+                  if(zmax < Strip_ClusterIndex->at(i)) zmax = Strip_ClusterIndex->at(i);
                   h_TimeCal->Fill(Cluster_Time_F->at(i));
                   h_NHits->Fill(Cluster_NumHits->at(i));
                   if(event_number == "All") {
                      h_test->Fill( histo_x_sign*(Cluster_X->at(i)+0.5), histo_y_sign*(Cluster_Y->at(i)+0.5));
+                     h_test3d->Fill( histo_x_sign*(Cluster_X->at(i)+0.5), Cluster_Time_F->at(i), histo_y_sign*(Cluster_Y->at(i)+0.5));
                   } else {
                      h_test->Fill( histo_x_sign*(Cluster_X->at(i)+0.5), histo_y_sign*(Cluster_Y->at(i)+0.5), Cluster_Index->at(i));
+                     h_test3d->Fill( histo_x_sign*(Cluster_X->at(i)+0.5), Cluster_Time_F->at(i), histo_y_sign*(Cluster_Y->at(i)+0.5), Cluster_Index->at(i));
                   }
                }
             }
@@ -327,9 +336,10 @@ void KODELPlot(string rootfile_name, string mapfile_name, string setfile_name, s
 
    string TimeCal_xtitle = "Calibrated TDC Hit Time";
    if(type_name == "Clusters") TimeCal_xtitle = "Cluster Fastest Hit Time";
-   h_TimeCal->SetTitle(Form("%s;%s [nsec];%s",title_name.c_str(),TimeCal_xtitle.c_str(),"Entries"));
+   //h_TimeCal->SetTitle(Form("%s;%s [nsec];%s",title_name.c_str(),TimeCal_xtitle.c_str(),"Entries"));
+   h_TimeCal->SetTitle(Form(";%s [nsec];%s",TimeCal_xtitle.c_str(),"Entries"));
    h_TimeCal->Draw("");
-   l_TimeCal->Draw("same");
+   //l_TimeCal->Draw("same");
 
    c_TimeCal->SaveAs(Form("%s_%s_%s_%s_%s.png",rootfile_name.c_str(),dec_name.c_str(),type_name.c_str(),event_number.c_str(),TimeCal_xtitle.c_str()));
 
@@ -350,12 +360,45 @@ void KODELPlot(string rootfile_name, string mapfile_name, string setfile_name, s
 
    string test2_xtitle = "TDC Hit Time [nsec]";
    if(type_name == "Clusters") test2_xtitle = "Cluster Multiplicity";
-   h_test2->SetTitle(Form("%s;%s;%s",title_name.c_str(),test2_xtitle.c_str(),"Entries"));
+   //h_test2->SetTitle(Form("%s;%s;%s",title_name.c_str(),test2_xtitle.c_str(),"Entries"));
+   h_test2->SetTitle(Form(";%s;%s",test2_xtitle.c_str(),"Entries"));
    h_test2->Draw("");
-   l_test2->Draw("same");
+   //l_test2->Draw("same");
    test2_xtitle.replace(12,7,"");
 
    c_test2->SaveAs(Form("%s_%s_%s_%s_%s.png",rootfile_name.c_str(),dec_name.c_str(),type_name.c_str(),event_number.c_str(),test2_xtitle.c_str()));
+
+
+   gStyle->SetCanvasPreferGL(true);
+   TCanvas* c_test3d = new TCanvas("c_test3d", "c_test3d", 1000, 700);
+   c_test3d->SetFillColor(0);
+   c_test3d->SetFillStyle(4000);
+
+   h_test3d->GetXaxis()->SetTitleOffset(1.5);
+   h_test3d->GetYaxis()->SetTitleOffset(1.5);
+
+   h_test3d->GetXaxis()->SetNdivisions(histo_width);
+   h_test3d->GetZaxis()->SetNdivisions(histo_height);
+   h_test3d->GetXaxis()->SetBinLabel(1,x_bin_start.c_str());
+   h_test3d->GetXaxis()->SetBinLabel(histo_width,x_bin_end.c_str());
+   h_test3d->GetZaxis()->SetBinLabel(1,y_bin_start.c_str());
+   h_test3d->GetZaxis()->SetBinLabel(histo_height,y_bin_end.c_str());
+
+   h_test3d->SetTitle(Form("%s;%s;%s [ns];%s",title_name.c_str(),x_title.c_str(), TimeCal_xtitle.c_str(),y_title.c_str()));
+
+   h_test3d->SetMinimum(0);
+   h_test3d->SetMaximum(zmax+1);
+
+   TF1 * tf = new TF1("TransferFunction", "x", 0., (float)(zmax+1));
+   TList * lof = h_test3d->GetListOfFunctions();
+   if (lof) lof->Add(tf);
+
+   h_test3d->Draw("GLCOL"); // FB BB A
+   gPad->SetTheta(40); // default is 30
+   gPad->SetPhi(45); // default is 30
+   gPad->Update();
+
+   c_test3d->SaveAs(Form("%s_%s_%s_%s_3D.png",rootfile_name.c_str(),dec_name.c_str(),type_name.c_str(),event_number.c_str()));
 
 }
 
