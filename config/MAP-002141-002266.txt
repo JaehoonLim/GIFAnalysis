@@ -1,0 +1,67 @@
+// MAPPING config file
+//
+// DetectorName'\t'	StripPerPartition'\t'	PartitionCut'\n'
+// TDC_start'\t'	TDC_end'\t'	Strip_start'\t'	Strip_end'\n'
+// ...
+// TDC_start'\t'	TDC_end'\t'	Strip_start'\t'	Strip_end'\n'
+// '\n' (when detector setting is end)
+//
+// You can find TDC channel & strip number for each test beam
+// on https://drive.google.com/open?id=1LyIAcLzgN0jdvHnPx1cIScB__B4uFL9U5UqvBO9ENrg
+//
+// 'DetectorName' needs Trolley number and Section number for Tracking (ex : T1S1)
+//
+T1S1 (RE22-BARC8)	32	C
+0	15	16	1
+16	31	32	17
+1000	1015	48	33
+1016	1031	64	49
+2000	2015	65	80
+2016	2031	81	96
+
+T1S2 (RE22-BARC9)	32	C
+32	47	16	1
+48	63	32	17
+1032	1047	48	33
+1048	1063	64	49
+2032	2047	65	80
+2048	2063	81	96
+
+T1S4 (RE42-165)	32	C
+96	111	16	1
+112	127	32	17
+1096	1111	48	33
+1112	1127	64	49
+2096	2111	65	80
+2112	2127	81	96
+
+T1S3 (RE42-166)	32	C
+64	79	16	1
+80	95	32	17
+1064	1079	48	33
+1080	1095	64	49
+2064	2079	65	80
+2080	2095	81	96
+
+T3S2 (RE42-KODEL)	32	ABC
+4032	4047	1	16
+4048	4063	17	32
+4064	4079	33	48
+4080	4095	49	64
+4096	4111	80	65
+4112	4127	96	81
+
+T3S4 (GT1)	32	A
+3000	3015	16	1
+3016	3031	32	17
+
+T3S3 (GT2)	32	A
+3032	3047	16	1
+3048	3063	32	17
+
+T3S6A (BARI-A)	8	A
+4000	4007	1	8
+
+T3S6B (BARI-B)	8	A
+4016	4023	1	8
+

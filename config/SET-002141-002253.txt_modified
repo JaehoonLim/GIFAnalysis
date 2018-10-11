@@ -1,0 +1,27 @@
+// Trolly SETTING config file
+//
+//		 ___
+//		|      ---   ______		   
+//  	   ^   	|		|      ---   ___   
+//         |  	|		|		|  
+//     +Y  |  	|		|		|  (X) -Z axis (Beam) 
+//    axis |  	|		|	     ___|  
+//         |  	|	     ___|___   ---	   
+//		|___   ---
+//		X	    --------->    +X axis
+//    DetectorPositionBase
+//      
+//
+// BEAM'\t' X_mean'\t' X_error'\t' Y_mean'\t' Y_error'\t' Time_mean'\t' Time_error'\n'
+// DetectorName'\t' Order'\t' DetectorWidth(X)'\t' DetectorHeight(Y-Wide)'\t' DetectorHeight(Y-Narrow)'\t' DetectorPosition(X)'\t' DetectorPositioY(Y)'\t' RotationAngle(ClockWise)'\n'
+//
+BEAM	1326	100	432	100	0	30
+T1S4 (RE42-165)	1	1591	863.5	586.5	0	0	0
+T1S3 (RE42-166)	2	1591	863.5	586.5	0	0	0
+T1S2 (RE22-BARC9)	3	1591	863.5	586.5	0	18	0
+T1S1 (RE22-BARC8)	4	1591	863.5	586.5	0	18	0
+T3S6A (BARI-A)	7	146.5	146.5	146.5	1253	359	0
+T3S6B (BARI-B)	8	146.5	146.5	146.5	1253	359	180
+T3S4 (GT1)	9	530	586.5	586.5	1061	138.5	0
+T3S3 (GT2)	10	530	586.5	586.5	1061	138.5	0
+T3S2 (RE42-KODEL)	11	1591	863.5	596.5	530	0	0
